@@ -1,0 +1,91 @@
+version: 0.2
+
+phases:
+
+  install: 
+    runtime-versions:
+      python: 3.9
+    commands:
+      # start up Docker
+      - |
+        nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock \
+          --host=tcp://0.0.0.0:2375 \
+          --storage-driver=overlay&
+        timeout 15 sh -c "until docker info; do echo .; sleep 1; done" 
+      # log into ECR
+      - |
+        aws ecr get-login-password --region ${AWS_DEFAULT_REGION} |\
+          docker login --username AWS \
+            --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+
+  build:
+    commands:
+      # system image build
+      - |
+        export NS="cumberland-cloud"
+        export ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${NS}"
+        declare -a SYSTEM=(
+          "system/auth/authorize" 
+          "system/auth/register" 
+          "system/auth/token"
+        )
+        for SYS in "${SYSTEM[@]}"
+        do
+          docker build --tag ${SYS}:latest \
+            --file Dockerfile \
+            ./lambdas/${SYS}
+          docker tag ${SYS}:latest \
+            ${ECR_URI}/${SYS}:latest
+          docker push ${ECR_URI}/${SYS}:latest
+        done
+      - |
+        export NS="cumberland-cloud"
+        export ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${NS}"
+        declare -a FUNCTIONS=(
+          "tenant/get-inventory"
+          "tenant/get-sale"
+          "tenant/post-inventory" 
+          "tenant/post-sale" 
+        )
+        for FUNC in "${FUNCTIONS[@]}"
+        do
+          docker build --tag ${FUNC}:latest \
+            --file Dockerfile \
+            ./lambdas/${FUNC}
+          docker tag ${FUNC}:latest \
+            ${ECR_URI}/${FUNC}:latest
+          docker push ${ECR_URI}/${FUNC}:latest
+        done
+        
+  post_build:
+    commands:
+      # system lambda deploys
+      - |
+        export NS="cumberland-cloud"
+        export ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${NS}"
+        declare -a arr=(
+          "system/auth/authorize" 
+          "system/auth/register" 
+          "system/auth/token"
+        )
+        for APP in "${arr[@]}"
+        do
+          aws lambda update-function-code \
+            --function-name "/${NS}/${APP}" \
+            --image-uri ${ECR_URI}/${APP}:latest
+        done 
+      - |
+        export NS="cumberland-cloud"
+        export ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${NS}"
+        declare -a FUNCTIONS=(
+          "tenant/get-inventory"
+          "tenant/get-sale"
+          "tenant/post-inventory" 
+          "tenant/post-sale" 
+        )
+        for FUNC in "${FUNCTIONS[@]}"
+        do
+          aws lambda update-function-code \
+            --function-name "/${NS}/${FUNC}" \
+            --image-uri ${ECR_URI}/${FUNC}:latest
+        done
