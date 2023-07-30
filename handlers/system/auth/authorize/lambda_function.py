@@ -1,11 +1,10 @@
-from typing import Dict, List, Union
-
+import jwt
 import json
 import os
 import requests
-import jwt
 
 from jwt.algorithms import RSAAlgorithm
+from typing import Dict, List, Union
 
 ACCOUNT_ID = os.environ['ACCOUNT_ID']
 API_ID = os.environ['API_ID']

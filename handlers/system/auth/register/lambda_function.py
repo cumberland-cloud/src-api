@@ -1,7 +1,7 @@
+import boto3 
 import json
 import os
 
-import boto3 
 from botocore.exceptions import ClientError
 
 CLIENT_ID = os.environ['CLIENT_ID']
@@ -31,9 +31,8 @@ def lambda_handler(event, context):
           'message' : 'No body in request'
         })
 
-    parsed_body = json.loads(body)
-
     try:
+        parsed_body = json.loads(body)
         response = cognito_idp().sign_up(
             UserName=parsed_body['username'],
             Password=parsed_body['password'],
