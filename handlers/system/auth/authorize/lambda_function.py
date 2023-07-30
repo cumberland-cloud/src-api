@@ -28,16 +28,17 @@ def lambda_handler(event: dict, context: dict):
     if jwk is None:
         return policy(None, True)
 
-    public_key = RSAAlgorithm.from_jwk(json.dumps(jwk))
     try:
+        public_key = RSAAlgorithm.from_jwk(json.dumps(jwk))
         decoded = decode_token(token, public_key)
 
-        if GROUP is not None:
-            if GROUP in decoded['cognito:groups']:
-                return policy(decoded['cognito:username'], False)
-            return policy(decoded['cognito:username'], True)
+        if GROUP is None:
+            return policy(decoded['cognito:username'], False)
 
-        return policy(decoded['cognito:username'], False)
+        if GROUP in decoded['cognito:groups']:
+            return policy(decoded['cognito:username'], False)
+
+        return policy(decoded['cognito:username'], True)
 
     except Exception as e:
         print(e)
@@ -48,13 +49,11 @@ def policy(principal: str, deny: bool) -> dict:
         "principalId": principal,
         "policyDocument": {
             "Version": "2012-10-17",
-            "Statement": [
-                {
-                    "Action": "execute-api:Invoke",
-                    "Effect": "Deny" if deny else "Allow",
-                    "Resource": f"arn:aws:execute-api:{REGION}:{ACCOUNT_ID}:{API_ID}/*"
-                }
-            ]
+            "Statement": [{
+                "Action": "execute-api:Invoke",
+                "Effect": "Deny" if deny else "Allow",
+                "Resource": f"arn:aws:execute-api:{REGION}:{ACCOUNT_ID}:{API_ID}/*"
+            }]
         }
     }
 

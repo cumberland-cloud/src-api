@@ -31,8 +31,8 @@ def lambda_handler(event, context):
           'message' : 'No body in request'
         })
 
-    parsed_body = json.loads(body)
     try:
+        parsed_body = json.loads(body)
         response = cognito_idp().initiate_auth(
             AuthFlow='USER_PASSWORD_AUTH',
             AuthParameters={
@@ -42,6 +42,6 @@ def lambda_handler(event, context):
             ClientId=CLIENT_ID,
         )
         return respond(200, response)
-        
+
     except ClientError as e:
         return respond(500, e)
