@@ -16,6 +16,8 @@ on:
 jobs:
   Lint:
     uses: cumberland-cloud/workflows/.github/workflows/py-lint.yaml@master
+    with:
+      SRC_DIR: handlers/auth/authorize
   Push:
     if: github.event_name == 'pull_request'
     uses: cumberland-cloud/workflows/.github/workflows/ecr-push.yaml@master
