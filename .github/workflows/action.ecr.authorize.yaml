@@ -5,20 +5,20 @@ on:
     branches:
       - feature/**
       - hotfix/**
-
   pull_request:
     branches:
       - test
       - dev
       - master
       - main
-
   workflow_dispatch:
 
 jobs:
+  Lint:
+    uses: cumberland-cloud/workflows/.github/workflows/py-lint.yaml@master
   Push:
     if: github.event_name == 'pull_request'
-    uses: TODO/workflows/.github/workflows/ecr-push.yml@main
+    uses: cumberland-cloud/workflows/.github/workflows/ecr-push.yaml@master
     with:
       IMAGE_NAME: cumberland-cloud/system/auth/authorize
       ## NOTE: If you are using immutable tags, SHA will always be unique.
