@@ -25,22 +25,23 @@ def lambda_handler(event: dict, context: dict):
     kid = header['kid']
     jwk = find_key(keys, kid)
 
-    if jwk is not None:
-        public_key = RSAAlgorithm.from_jwk(json.dumps(jwk))
-        try:
-            decoded = decode_token(token, public_key)
+    if jwk is None:
+        return policy(None, True)
 
-            if GROUP is not None:
-                if GROUP in decoded['cognito:groups']:
-                    return policy(decoded['cognito:username'], False)
-                return policy(decoded['cognito:username'], True)
+    public_key = RSAAlgorithm.from_jwk(json.dumps(jwk))
+    try:
+        decoded = decode_token(token, public_key)
 
-            return policy(decoded['cognito:username'], False)
+        if GROUP is not None:
+            if GROUP in decoded['cognito:groups']:
+                return policy(decoded['cognito:username'], False)
+            return policy(decoded['cognito:username'], True)
 
-        except Exception as e:
-            print(e)
-            return policy(None, True)
-    return policy(None, True)
+        return policy(decoded['cognito:username'], False)
+
+    except Exception as e:
+        print(e)
+        return policy(None, True)
 
 def policy(principal: str, deny: bool) -> dict:
     return {
