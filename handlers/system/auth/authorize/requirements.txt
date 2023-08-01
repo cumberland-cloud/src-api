@@ -1,3 +1,0 @@
-requests==2.27.1
-pyjwt==2.4.0
-cryptography==37.0.2
