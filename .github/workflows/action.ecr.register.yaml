@@ -17,7 +17,7 @@ jobs:
   Lint:
     uses: cumberland-cloud/workflows/.github/workflows/py-lint.yaml@master
     with:
-      SRC_DIR: handlers/auth/register
+      SRC_DIR: handlers/system/auth/register
   Push:
     if: github.event_name == 'pull_request'
     uses: cumberland-cloud/workflows/.github/workflows/ecr-push.yml@main
@@ -30,7 +30,7 @@ jobs:
       ##       in other words, this will tag the image with 'latest' on master,
       ##       and the commit SHA hash on all other branches
       IMAGE_TAG: ${{ (contains(github.base_ref, 'master') && 'latest') || github.sha }}
-      DOCKER_BUILD_CONTEXT: handlers/auth/register
+      DOCKER_BUILD_CONTEXT: handlers/system/auth/register
       DOCKERFILE_DIR: "."
     secrets:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
