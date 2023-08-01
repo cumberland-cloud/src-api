@@ -21,6 +21,7 @@ jobs:
   Push:
     if: github.event_name == 'pull_request'
     uses: cumberland-cloud/workflows/.github/workflows/ecr-push.yaml@master
+    needs: [ Lint ]
     with:
       IMAGE_NAME: cumberland-cloud/system/auth/authorize
       ## NOTE: If you are using immutable tags, SHA will always be unique.
@@ -30,6 +31,7 @@ jobs:
       ##       and the commit SHA hash on all other branches
       IMAGE_TAG: ${{ (contains(github.base_ref, 'master') && 'latest') || github.sha }}
       DOCKER_BUILD_CONTEXT: handlers/auth/authorize
+      DOCKERFILE_DIR: "."
     secrets:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       AWS_IAM_USER: ${{ secrets.AWS_IAM_USER }}

@@ -31,6 +31,7 @@ jobs:
       ##       and the commit SHA hash on all other branches
       IMAGE_TAG: ${{ (contains(github.base_ref, 'master') && 'latest') || github.sha }}
       DOCKER_BUILD_CONTEXT: handlers/auth/register
+      DOCKERFILE_DIR: "."
     secrets:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       AWS_IAM_USER: ${{ secrets.AWS_IAM_USER }}
