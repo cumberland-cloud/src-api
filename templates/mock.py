@@ -1,6 +1,6 @@
 import json
 
-def lambda_handler(event, context):
+def handle(event, context):
     body = event.get('body', None)
 
     if body is not None:

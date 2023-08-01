@@ -16,7 +16,7 @@ GROUP = os.environ.setdefault('GROUP', None)
 def key_url() -> str:
     return 'https://cognito-idp.{}.amazonawse.com/{}/.well-known/jwks.json'.format(REGION, USERPOOL_ID)
 
-def lambda_handler(event: dict, context: dict):
+def handle(event: dict, context: dict):
     token = event['authorizationToken'].split(' ')[-1]
     header = jwt.get_unverified_header(token)
 

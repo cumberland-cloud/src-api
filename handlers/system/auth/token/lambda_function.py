@@ -23,7 +23,7 @@ def respond(status: int, response: dict):
         "body": json.dumps(response)
     } 
 
-def lambda_handler(event, context):
+def handle(event, context):
     body = event.get('body', None)
 
     if body is None:
