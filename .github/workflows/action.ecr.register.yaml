@@ -20,7 +20,7 @@ jobs:
       SRC_DIR: handlers/system/auth/register
   Push:
     if: github.event_name == 'pull_request'
-    uses: cumberland-cloud/workflows/.github/workflows/ecr-push.yaml@main
+    uses: cumberland-cloud/workflows/.github/workflows/ecr-push.yaml@master
     needs: [ Lint ]
     with:
       IMAGE_NAME: cumberland-cloud/system/auth/register
